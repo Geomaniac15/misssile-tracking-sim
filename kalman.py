@@ -59,5 +59,5 @@ class KalmanCV:
         K = self.P @ self.H.T @ np.linalg.inv(S)
 
         self.x = self.x + (K @ y)
-        I = np.eye(4)
-        self.P = (I - K @ self.H) @ self.P
+        identity_matrix = np.eye(4)
+        self.P = (identity_matrix - K @ self.H) @ self.P
