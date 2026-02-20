@@ -3,7 +3,18 @@ import numpy as np
 GRAVITY = 9.81
 
 class Missile:
-    def __init__(self, x, y, speed, angle_deg, boost_accel, boost_time):
+    def __init__(self, 
+                 x, 
+                 y, 
+                 speed, 
+                 angle_deg,
+                 thrust,          # Newtons
+                 mass_initial,    # kg
+                 mass_flow_rate,  # kg/s
+                 burn_time,       # seconds
+                 pitch_rate_deg   # degrees per second
+                 ):
+        
         self.x = x
         self.y = y
         
@@ -12,19 +23,30 @@ class Missile:
         self.vx = speed * np.cos(angle)
         self.vy = speed * np.sin(angle)
 
-        self.boost_accel = boost_accel
-        self.boost_time = boost_time
+        self.thrust = thrust
+        self.mass_initial = mass_initial
+        self.mass = mass_initial
+        self.mass_flow_rate = mass_flow_rate
+        self.burn_time = burn_time
+
+        self.theta0 = angle
+        self.pitch_rate = np.radians(pitch_rate_deg)
 
         self.time = 0
     
     def update(self, dt):
 
         # find acceleration
-        if self.time < self.boost_time:
-            angle = np.arctan2(self.vy, self.vx)
+        if self.time < self.burn_time:
 
-            ax = self.boost_accel * np.cos(angle)
-            ay = self.boost_accel * np.sin(angle) - GRAVITY
+            theta = self.theta0 - self.pitch_rate * self.time
+
+            ax = (self.thrust * np.cos(theta)) / self.mass
+            ay = (self.thrust * np.sin(theta)) / self.mass - GRAVITY
+
+            # update mass
+            self.mass -= self.mass_flow_rate * dt
+            
         else:
             ax = 0
             ay = -GRAVITY
